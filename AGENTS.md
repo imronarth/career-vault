@@ -34,10 +34,11 @@ When the human types `next` (or `next CV-<N>`):
 4. Test:
    `podman run --rm -v "$PWD":/app:Z -v ~/.m2:/root/.m2:Z -w /app docker.io/library/maven:3-eclipse-temurin-25 mvn -q test`
 5. Commit on the branch, with the message `CV-<N>: <summary>`.
-6. Comment using the **Handoff template** below, then move the issue to `Review by <other>`.
+6. Run `git switch --detach` to release the branch, since git allows a branch to be checked out in only one worktree. That lets the reviewer check it out.
+7. Comment using the **Handoff template** below, then move the issue to `Review by <other>`.
 
 ### Review (from `Review by <me>`)
-1. Run `git diff main...cv-<N>-<slug>` (the branches are shared by all worktrees). Read the issue's acceptance criteria. To run the tests, use `git switch cv-<N>-<slug>` in YOUR worktree, then switch back.
+1. Run `git diff main...cv-<N>-<slug>` (the branches are shared by all worktrees). Read the issue's acceptance criteria. To run the tests, use `git switch cv-<N>-<slug>` in YOUR worktree, then `git switch --detach` when you're done.
 2. Check correctness, the acceptance criteria, security (path traversal, auth on routes), and that tests pass. Run the tests yourself.
 3. Comment using the **Review template**.
    - Approved: `git -C ../career-vault merge --no-ff cv-<N>-<slug>` (merge happens in the main checkout), move the issue to `Done`, then move any issues it was blocking whose blockers are now all Done to their `Ready for <builder>` state.
@@ -45,7 +46,7 @@ When the human types `next` (or `next CV-<N>`):
 
 ### Fix (from `Fix (<me>)`)
 1. Reply to each review point (✅ fixed / ❓ disagree + why).
-2. Fix on the same branch, run the tests, commit, then move the issue to `Review by <other>`.
+2. Run `git switch cv-<N>-<slug>`, fix, run the tests, commit, run `git switch --detach`, then move the issue to `Review by <other>`.
 3. If this issue has had **3 fix rounds** already, add `needs-human` instead and stop.
 
 ## Templates
