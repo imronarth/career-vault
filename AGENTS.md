@@ -5,6 +5,8 @@ The **human is the orchestrator**: they open one CLI and type `next`. Agents nev
 Coordination happens ONLY on the Plane board (workspace `career-vault`, project `CV`), reached through the `plane` MCP server.
 
 Full spec: `docs/implementation_plan.md`. Read only the sections your issue needs.
+Controller ↔ template names: `docs/ui-contract.md`. This is binding for both agents.
+Issues list their blockers as `Blocked by: CV-x, CV-y` in the description.
 
 ## Who am I?
 - Running in Claude Code → you are **Claude**. Your worktree: `../career-vault-claude`.
@@ -27,7 +29,7 @@ When the human types `next` (or `next CV-<N>`):
 
 ### Build (from `Ready for <me>`)
 1. Move the issue to `In Progress` and comment `🤖 <me> picked this up`.
-2. Run `git switch main && git pull` (if a remote exists), then `git switch -c cv-<N>-<slug>` in your worktree.
+2. In your worktree, create a branch from main: `git switch -c cv-<N>-<slug> main`. Never check out `main` in a worktree, because it is already checked out in `../career-vault`.
 3. Implement ONLY what the acceptance criteria say. Don't expand the scope.
 4. Test:
    `podman run --rm -v "$PWD":/app:Z -v ~/.m2:/root/.m2:Z -w /app docker.io/library/maven:3-eclipse-temurin-25 mvn -q test`
@@ -35,10 +37,10 @@ When the human types `next` (or `next CV-<N>`):
 6. Comment using the **Handoff template** below, then move the issue to `Review by <other>`.
 
 ### Review (from `Review by <me>`)
-1. Run `git fetch` (if a remote exists), then `git diff main...cv-<N>-<slug>`. Read the issue's acceptance criteria.
+1. Run `git diff main...cv-<N>-<slug>` (the branches are shared by all worktrees). Read the issue's acceptance criteria. To run the tests, use `git switch cv-<N>-<slug>` in YOUR worktree, then switch back.
 2. Check correctness, the acceptance criteria, security (path traversal, auth on routes), and that tests pass. Run the tests yourself.
 3. Comment using the **Review template**.
-   - Approved: `git switch main && git merge --no-ff cv-<N>-<slug>`, move the issue to `Done`, then move any issues it was blocking whose blockers are now all Done to their `Ready for <builder>` state.
+   - Approved: `git -C ../career-vault merge --no-ff cv-<N>-<slug>` (merge happens in the main checkout), move the issue to `Done`, then move any issues it was blocking whose blockers are now all Done to their `Ready for <builder>` state.
    - Changes needed: move the issue to `Fix (<author>)`.
 
 ### Fix (from `Fix (<me>)`)
