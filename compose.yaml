@@ -33,6 +33,7 @@ services:
       APP_ADMIN_USERNAME: ${APP_ADMIN_USERNAME:-admin}
       APP_ADMIN_PASSWORD: ${APP_ADMIN_PASSWORD:?set APP_ADMIN_PASSWORD in .env}
       APP_STORAGE_ROOT: /app/storage
+      TZ: ${APP_TIMEZONE:-Asia/Jakarta}
     volumes:
       - career_uploads:/app/storage
     healthcheck:
