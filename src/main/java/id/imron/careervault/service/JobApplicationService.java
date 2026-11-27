@@ -105,6 +105,24 @@ public class JobApplicationService {
         return job;
     }
 
+    /**
+     * Status history, newest first.
+     * @throws EntityNotFoundException if there is no such application
+     */
+    @Transactional(readOnly = true)
+    public List<JobStatusHistory> history(Long id) {
+        find(id);
+        return history.findByJobApplicationIdOrderByChangedAtDesc(id);
+    }
+
+    /**
+     * Deletes the application; the database removes its history.
+     * @throws EntityNotFoundException if there is no such application
+     */
+    public void delete(Long id) {
+        jobs.delete(find(id));
+    }
+
     /** All applications matching the filter, newest first, as a UTF-8 CSV file. */
     @Transactional(readOnly = true)
     public byte[] exportCsv(JobSearchFilter filter) {
