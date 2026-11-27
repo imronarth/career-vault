@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, active, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' - Career Vault'">Career Vault</title>
+    <link rel="stylesheet" th:href="@{/vendor/tabler/tabler.min.css}">
+    <link rel="stylesheet" th:href="@{/vendor/tabler/tabler-icons.min.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="page">
+    <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu"
+                    aria-controls="sidebar-menu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <h1 class="navbar-brand navbar-brand-autodark">
+                <a th:href="@{/dashboard}" class="text-decoration-none text-reset">
+                    <i class="ti ti-shield-lock me-2"></i>Career Vault
+                </a>
+            </h1>
+            <div class="collapse navbar-collapse" id="sidebar-menu">
+                <ul class="navbar-nav pt-lg-3">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/dashboard}"
+                           th:classappend="${active == 'dashboard'} ? 'active' : ''">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-layout-dashboard"></i>
+                            </span>
+                            <span class="nav-link-title">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/jobs}"
+                           th:classappend="${active == 'jobs'} ? 'active' : ''">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-briefcase"></i>
+                            </span>
+                            <span class="nav-link-title">Job Applications</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/documents}"
+                           th:classappend="${active == 'documents'} ? 'active' : ''">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-folder"></i>
+                            </span>
+                            <span class="nav-link-title">Document Vault</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/documents/upload}"
+                           th:classappend="${active == 'upload'} ? 'active' : ''">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-upload"></i>
+                            </span>
+                            <span class="nav-link-title">Quick Upload</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </aside>
+
+    <div class="page-wrapper">
+        <header class="navbar navbar-expand-md d-print-none">
+            <div class="container-xl">
+                <div class="navbar-nav flex-row order-md-last ms-auto align-items-center gap-2">
+                    <button type="button" class="nav-link px-2" data-theme-toggle
+                            aria-label="Toggle dark mode" title="Toggle dark mode">
+                        <i class="ti ti-moon"></i>
+                    </button>
+                    <span class="nav-link text-reset" th:text="${currentUserFullName ?: 'Account'}">Account</span>
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">
+                            <i class="ti ti-logout me-1"></i>Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </header>
+
+        <div class="page-body">
+            <div class="container-xl">
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible" role="alert">
+                    <div class="d-flex">
+                        <div><i class="ti ti-check alert-icon"></i></div>
+                        <div th:text="${successMessage}">Success</div>
+                    </div>
+                    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+                </div>
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible" role="alert">
+                    <div class="d-flex">
+                        <div><i class="ti ti-alert-circle alert-icon"></i></div>
+                        <div th:text="${errorMessage}">Error</div>
+                    </div>
+                    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+                </div>
+
+                <th:block th:replace="${content}"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal modal-blur fade" id="confirm-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-status bg-danger"></div>
+            <div class="modal-body text-center py-4">
+                <i class="ti ti-alert-triangle icon mb-2 text-danger icon-lg"></i>
+                <h3>Confirm Action</h3>
+                <div class="text-secondary" id="confirm-modal-message">Are you sure?</div>
+            </div>
+            <div class="modal-footer">
+                <div class="w-100">
+                    <div class="row">
+                        <div class="col">
+                            <button type="button" class="btn w-100" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-danger w-100" id="confirm-modal-submit">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal modal-blur fade" id="preview-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="preview-modal-title">Document Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="preview-modal-body"></div>
+            <div class="modal-footer">
+                <a href="#" id="preview-modal-download" class="btn btn-primary d-none">
+                    <i class="ti ti-download me-1"></i>Download
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/vendor/tabler/tabler.min.js}"></script>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>
