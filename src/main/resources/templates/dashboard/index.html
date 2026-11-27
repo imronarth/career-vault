@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/app :: layout(title='Dashboard', active='dashboard', content=~{::content})}">
+<body>
+<div th:fragment="content">
+    <div class="page-header d-print-none mb-4">
+        <div class="row align-items-center">
+            <div class="col">
+                <h2 class="page-title">Dashboard</h2>
+                <div class="text-secondary mt-1">Overview of your job applications and career document vault</div>
+            </div>
+            <div class="col-auto ms-auto d-flex gap-2">
+                <a th:href="@{/jobs/new}" class="btn btn-primary">
+                    <i class="ti ti-plus me-1"></i>Add Application
+                </a>
+                <a th:href="@{/documents/upload}" class="btn btn-outline-primary">
+                    <i class="ti ti-upload me-1"></i>Upload Document
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row row-deck row-cards mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="subheader">Total Applications</div>
+                        <span class="ms-auto text-primary"><i class="ti ti-briefcase"></i></span>
+                    </div>
+                    <div class="h1 mt-2 mb-0" th:text="${summary.totalJobs}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="subheader">Active Pipeline</div>
+                        <span class="ms-auto text-azure"><i class="ti ti-bolt"></i></span>
+                    </div>
+                    <div class="h1 mt-2 mb-0" th:text="${summary.activePipeline}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="subheader">Offers</div>
+                        <span class="ms-auto text-green"><i class="ti ti-trophy"></i></span>
+                    </div>
+                    <div class="h1 mt-2 mb-0" th:text="${summary.offers}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="subheader">Vault Files</div>
+                        <span class="ms-auto text-indigo"><i class="ti ti-files"></i></span>
+                    </div>
+                    <div class="h1 mt-2 mb-1" th:text="${summary.totalFiles}">0</div>
+                    <div class="text-secondary small" th:text="${summary.totalStorageFormatted}">0 B</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row row-cards mb-4">
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3 class="card-title">Pipeline Breakdown</h3>
+                </div>
+                <div class="card-body">
+                    <div th:if="${summary.totalJobs == 0 or #maps.isEmpty(summary.statusBreakdown)}"
+                         class="text-secondary">
+                        No job applications recorded yet.
+                    </div>
+                    <div th:if="${summary.totalJobs > 0 and not #maps.isEmpty(summary.statusBreakdown)}">
+                        <div class="progress progress-separated mb-3" style="height: 12px;">
+                            <div th:each="entry : ${summary.statusBreakdown}"
+                                 th:if="${entry.value > 0}"
+                                 class="progress-bar"
+                                 role="progressbar"
+                                 th:classappend="${entry.key.badgeClass}"
+                                 th:style="|width: ${entry.value * 100.0 / summary.totalJobs}%|"
+                                 th:title="|${entry.key.label}: ${entry.value}|">
+                            </div>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6 col-sm-4 col-md-3" th:each="entry : ${summary.statusBreakdown}">
+                                <a th:href="@{/jobs(status=${entry.key})}"
+                                   class="d-flex align-items-center justify-content-between p-2 rounded border text-decoration-none text-reset">
+                                    <span class="badge" th:classappend="${entry.key.badgeClass}"
+                                          th:text="${entry.key.label}">Status</span>
+                                    <strong th:text="${entry.value}">0</strong>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3 class="card-title">Primary CV</h3>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <div th:if="${summary.primaryCv != null}">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-blue-lt me-2"><i class="ti ti-file-cv me-1"></i>Primary</span>
+                            <span th:if="${summary.primaryCv.versionLabel}" class="text-secondary small"
+                                  th:text="${summary.primaryCv.versionLabel}">v1</span>
+                        </div>
+                        <div class="h4 mb-1" th:text="${summary.primaryCv.title}">Resume</div>
+                        <div class="text-secondary small text-truncate mb-3"
+                             th:text="${summary.primaryCv.originalFilename}">cv.pdf</div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-primary btn-sm"
+                                    th:if="${summary.primaryCv.contentType == 'application/pdf' or #strings.startsWith(summary.primaryCv.contentType, 'image/')}"
+                                    th:attr="data-preview-url=@{/documents/{id}/preview(id=${summary.primaryCv.id})},
+                                             data-preview-title=${summary.primaryCv.title},
+                                             data-preview-type=${summary.primaryCv.contentType},
+                                             data-download-url=@{/documents/{id}/download(id=${summary.primaryCv.id})}">
+                                <i class="ti ti-eye me-1"></i>Preview
+                            </button>
+                            <a th:href="@{/documents/{id}/download(id=${summary.primaryCv.id})}"
+                               class="btn btn-primary btn-sm">
+                                <i class="ti ti-download me-1"></i>Download
+                            </a>
+                        </div>
+                    </div>
+                    <div th:if="${summary.primaryCv == null}" class="text-secondary">
+                        <p class="mb-3">No primary CV is marked yet.</p>
+                        <a th:href="@{/documents/upload}" class="btn btn-outline-primary btn-sm">
+                            <i class="ti ti-upload me-1"></i>Upload Primary CV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row row-cards mb-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3 class="card-title">Upcoming Follow-ups</h3>
+                    <div class="card-actions">
+                        <a th:href="@{/jobs}" class="btn btn-sm btn-ghost-secondary">
+                            View all <i class="ti ti-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+                <div th:if="${#lists.isEmpty(summary.upcomingFollowUps)}" class="card-body text-secondary">
+                    No upcoming follow-ups scheduled.
+                </div>
+                <div th:if="${not #lists.isEmpty(summary.upcomingFollowUps)}" class="list-group list-group-flush">
+                    <a th:each="job : ${summary.upcomingFollowUps}"
+                       th:href="@{/jobs/{id}(id=${job.id})}"
+                       class="list-group-item list-group-item-action">
+                        <div class="row align-items-center">
+                            <div class="col text-truncate">
+                                <strong th:text="${job.companyName}">Company</strong>
+                                <span class="text-secondary" th:text="' - ' + ${job.roleTitle}"> - Role</span>
+                            </div>
+                            <div class="col-auto d-flex align-items-center gap-2">
+                                <span class="badge" th:classappend="${job.status.badgeClass}"
+                                      th:text="${job.status.label}">Status</span>
+                                <span class="text-secondary small">
+                                    <i class="ti ti-calendar-event me-1"></i>
+                                    <span th:text="${job.followUpDate}">2026-01-01</span>
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Applications</h3>
+                    <div class="card-actions">
+                        <a th:href="@{/jobs}" class="btn btn-sm btn-ghost-secondary">
+                            View all <i class="ti ti-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+                <div th:if="${#lists.isEmpty(summary.recentApplications)}" class="card-body text-secondary">
+                    No recent applications yet.
+                </div>
+                <div th:if="${not #lists.isEmpty(summary.recentApplications)}" class="list-group list-group-flush">
+                    <a th:each="job : ${summary.recentApplications}"
+                       th:href="@{/jobs/{id}(id=${job.id})}"
+                       class="list-group-item list-group-item-action">
+                        <div class="row align-items-center">
+                            <div class="col text-truncate">
+                                <strong th:text="${job.companyName}">Company</strong>
+                                <div class="text-secondary small text-truncate"
+                                     th:text="|${job.roleTitle} · ${job.workMode.label}|">Role · Remote</div>
+                            </div>
+                            <div class="col-auto text-end">
+                                <span class="badge" th:classappend="${job.status.badgeClass}"
+                                      th:text="${job.status.label}">Status</span>
+                                <div class="text-secondary small mt-1"
+                                     th:if="${job.appliedDate != null}" th:text="${job.appliedDate}">2026-01-01</div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row row-cards">
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Documents</h3>
+                    <div class="card-actions">
+                        <a th:href="@{/documents}" class="btn btn-sm btn-ghost-secondary">
+                            View all <i class="ti ti-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+                <div th:if="${#lists.isEmpty(summary.recentDocuments)}" class="card-body text-secondary">
+                    No documents uploaded yet.
+                </div>
+                <div th:if="${not #lists.isEmpty(summary.recentDocuments)}" class="list-group list-group-flush">
+                    <div th:each="doc : ${summary.recentDocuments}" class="list-group-item">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span class="badge" th:classappend="${doc.category.badgeClass}">
+                                    <i th:class="${doc.category.iconClass}"></i>
+                                </span>
+                            </div>
+                            <div class="col text-truncate">
+                                <div class="fw-medium text-truncate" th:text="${doc.title}">Document</div>
+                                <div class="text-secondary small">
+                                    <span th:text="${doc.category.label}">Category</span>
+                                    <span th:if="${doc.versionLabel}" th:text="| · ${doc.versionLabel}|"></span>
+                                </div>
+                            </div>
+                            <div class="col-auto d-flex gap-1">
+                                <a th:href="@{/documents/{id}/download(id=${doc.id})}"
+                                   class="btn btn-sm btn-outline-secondary" title="Download">
+                                    <i class="ti ti-download"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3 class="card-title">Documents by Category</h3>
+                </div>
+                <div class="card-body">
+                    <div th:if="${#maps.isEmpty(summary.documentsPerCategory)}" class="text-secondary">
+                        No documents categorized yet.
+                    </div>
+                    <div th:if="${not #maps.isEmpty(summary.documentsPerCategory)}" class="d-flex flex-wrap gap-2">
+                        <a th:each="entry : ${summary.documentsPerCategory}"
+                           th:href="@{/documents(category=${entry.key})}"
+                           class="btn btn-outline-secondary btn-sm">
+                            <i th:class="${entry.key.iconClass + ' me-1'}"></i>
+                            <span th:text="${entry.key.label}">Category</span>
+                            <span class="badge bg-secondary-lt ms-2" th:text="${entry.value}">0</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
