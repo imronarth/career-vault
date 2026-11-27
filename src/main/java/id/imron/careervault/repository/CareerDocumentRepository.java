@@ -14,6 +14,8 @@ public interface CareerDocumentRepository
 
     List<CareerDocument> findByCategoryAndPrimaryTrue(DocumentCategory category);
 
+    List<CareerDocument> findTop6ByOrderByCreatedAtDescIdDesc();
+
     /** One row per category that has at least one document. */
     @Query("select d.category as category, count(d) as total from CareerDocument d group by d.category")
     List<CategoryCount> countGroupedByCategory();
