@@ -3,6 +3,16 @@
 
     const THEME_KEY = "cv-theme";
 
+    function getModalClass() {
+        if (window.tabler && window.tabler.Modal) {
+            return window.tabler.Modal;
+        }
+        if (window.bootstrap && window.bootstrap.Modal) {
+            return window.bootstrap.Modal;
+        }
+        return null;
+    }
+
     function applyTheme(theme) {
         const resolved = theme === "dark" ? "dark" : "light";
         document.documentElement.setAttribute("data-bs-theme", resolved);
@@ -11,10 +21,15 @@
         });
     }
 
+    const savedTheme = localStorage.getItem(THEME_KEY);
+    if (savedTheme === "dark" || savedTheme === "light") {
+        applyTheme(savedTheme);
+    }
+
     function initThemeToggle() {
-        const saved = localStorage.getItem(THEME_KEY);
-        if (saved === "dark" || saved === "light") {
-            applyTheme(saved);
+        const currentSaved = localStorage.getItem(THEME_KEY);
+        if (currentSaved === "dark" || currentSaved === "light") {
+            applyTheme(currentSaved);
         }
 
         document.addEventListener("click", (event) => {
@@ -29,6 +44,17 @@
         });
     }
 
+    function submitConfirmForm(sourceForm, trigger) {
+        const isSubmitControl = (trigger.tagName === "BUTTON" && (!trigger.type || trigger.type === "submit"))
+            || (trigger.tagName === "INPUT" && (trigger.type === "submit" || trigger.type === "image"));
+
+        if (typeof sourceForm.requestSubmit === "function") {
+            sourceForm.requestSubmit(isSubmitControl ? trigger : undefined);
+        } else {
+            sourceForm.submit();
+        }
+    }
+
     function initConfirmModal() {
         document.addEventListener("click", (event) => {
             const trigger = event.target.closest("[data-confirm]");
@@ -38,8 +64,9 @@
 
             const message = trigger.getAttribute("data-confirm") || "Are you sure?";
             const modalEl = document.getElementById("confirm-modal");
+            const ModalClass = getModalClass();
 
-            if (!modalEl || typeof bootstrap === "undefined" || !bootstrap.Modal) {
+            if (!modalEl || !ModalClass) {
                 if (!window.confirm(message)) {
                     event.preventDefault();
                 }
@@ -54,23 +81,23 @@
             }
 
             const confirmBtn = document.getElementById("confirm-modal-submit");
-            const sourceForm = trigger.closest("form");
-            const actionUrl = trigger.getAttribute("data-confirm-action");
+            const sourceForm = trigger.form || trigger.closest("form");
+            const actionUrl = trigger.getAttribute("data-confirm-action") || trigger.getAttribute("href");
 
             if (confirmBtn) {
                 const freshBtn = confirmBtn.cloneNode(true);
                 confirmBtn.parentNode.replaceChild(freshBtn, confirmBtn);
                 freshBtn.addEventListener("click", () => {
-                    bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+                    ModalClass.getOrCreateInstance(modalEl).hide();
                     if (sourceForm) {
-                        sourceForm.submit();
+                        submitConfirmForm(sourceForm, trigger);
                     } else if (actionUrl) {
                         window.location.assign(actionUrl);
                     }
                 });
             }
 
-            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+            ModalClass.getOrCreateInstance(modalEl).show();
         });
     }
 
@@ -103,7 +130,8 @@
             const downloadUrl = trigger.getAttribute("data-download-url") || "";
 
             const currentModalEl = document.getElementById("preview-modal");
-            if (!currentModalEl || typeof bootstrap === "undefined" || !bootstrap.Modal) {
+            const ModalClass = getModalClass();
+            if (!currentModalEl || !ModalClass) {
                 window.open(url, "_blank", "noopener");
                 return;
             }
@@ -144,7 +172,7 @@
                 }
             }
 
-            bootstrap.Modal.getOrCreateInstance(currentModalEl).show();
+            ModalClass.getOrCreateInstance(currentModalEl).show();
         });
     }
 
