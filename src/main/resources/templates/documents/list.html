@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/app :: layout(title='Document Vault', active='documents', content=~{::content})}">
+<body>
+<div th:fragment="content">
+    <div class="page-header d-print-none mb-4">
+        <div class="row align-items-center">
+            <div class="col">
+                <h2 class="page-title">Document Vault</h2>
+                <div class="text-secondary mt-1" th:text="|${page.totalElements} document(s)|">0 document(s)</div>
+            </div>
+            <div class="col-auto ms-auto">
+                <a th:href="@{/documents/upload}" class="btn btn-primary">
+                    <i class="ti ti-upload me-1"></i>Upload Document
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <a th:href="@{/documents(keyword=${keyword})}"
+                   class="btn btn-sm"
+                   th:classappend="${category == null} ? 'btn-primary' : 'btn-outline-secondary'">
+                    All
+                </a>
+                <a th:each="cat : ${categories}"
+                   th:href="@{/documents(category=${cat}, keyword=${keyword})}"
+                   class="btn btn-sm"
+                   th:classappend="${category == cat} ? 'btn-primary' : 'btn-outline-secondary'">
+                    <i th:class="${cat.iconClass + ' me-1'}"></i>
+                    <span th:text="${cat.label}">Category</span>
+                    <span class="badge ms-1"
+                          th:classappend="${category == cat} ? 'bg-white text-primary' : 'bg-secondary-lt'"
+                          th:text="${categoryCounts != null and categoryCounts.get(cat) != null ? categoryCounts.get(cat) : 0}">0</span>
+                </a>
+            </div>
+
+            <form th:action="@{/documents}" method="get" class="row g-2 align-items-center">
+                <input type="hidden" name="category" th:if="${category != null}" th:value="${category}">
+                <div class="col">
+                    <input type="text" name="keyword" th:value="${keyword}" class="form-control"
+                           placeholder="Search by title, tags, issuer, or filename...">
+                </div>
+                <div class="col-auto d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                    <a th:href="@{/documents}" class="btn btn-outline-secondary">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div th:if="${page.empty}" class="card">
+        <div class="card-body text-center py-5">
+            <p class="text-secondary mb-3">No documents found.</p>
+            <a th:href="@{/documents/upload}" class="btn btn-primary">
+                <i class="ti ti-upload me-1"></i>Upload a document
+            </a>
+        </div>
+    </div>
+
+    <div th:if="${not page.empty}" class="row row-cards">
+        <div class="col-md-6 col-lg-4" th:each="doc : ${page.content}">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                        <span class="badge" th:classappend="${doc.category.badgeClass}">
+                            <i th:class="${doc.category.iconClass + ' me-1'}"></i>
+                            <span th:text="${doc.category.label}">Category</span>
+                        </span>
+                        <span th:if="${doc.primary}" class="badge bg-blue-lt">Primary</span>
+                        <span th:if="${doc.versionLabel != null and not #strings.isEmpty(doc.versionLabel)}"
+                              class="badge bg-secondary-lt ms-auto" th:text="${doc.versionLabel}">v1</span>
+                    </div>
+
+                    <h3 class="card-title mb-1" th:text="${doc.title}">Document Title</h3>
+                    <div class="text-secondary small text-truncate mb-2" th:text="${doc.originalFilename}">file.pdf</div>
+
+                    <div class="text-secondary small mb-2">
+                        <span th:if="${doc.issuerOrContext != null and not #strings.isEmpty(doc.issuerOrContext)}"
+                              th:text="${doc.issuerOrContext}">Issuer</span>
+                        <span th:if="${doc.issuerOrContext != null and not #strings.isEmpty(doc.issuerOrContext) and doc.documentDate != null}"> · </span>
+                        <span th:if="${doc.documentDate != null}" th:text="${doc.documentDate}">2026-01-01</span>
+                    </div>
+
+                    <p th:if="${doc.description != null and not #strings.isEmpty(doc.description)}"
+                       class="text-secondary small mb-2" th:text="${#strings.abbreviate(doc.description, 150)}">Description</p>
+
+                    <div class="text-secondary small">
+                        <span th:text="${doc.fileSizeBytes >= 1048576 ? #numbers.formatDecimal(doc.fileSizeBytes / 1048576.0, 1, 1) + ' MB' : (doc.fileSizeBytes >= 1024 ? #numbers.formatDecimal(doc.fileSizeBytes / 1024.0, 1, 1) + ' KB' : doc.fileSizeBytes + ' B')}">0 B</span>
+                        <span th:if="${doc.tags != null and not #strings.isEmpty(doc.tags)}"
+                              th:text="| · ${doc.tags}|"></span>
+                    </div>
+                </div>
+                <div class="card-footer d-flex gap-2 flex-wrap">
+                    <button type="button" class="btn btn-sm btn-outline-primary"
+                            th:if="${doc.contentType == 'application/pdf' or #strings.startsWith(doc.contentType, 'image/')}"
+                            th:attr="data-preview-url=@{/documents/{id}/preview(id=${doc.id})},
+                                     data-preview-title=${doc.title},
+                                     data-preview-type=${doc.contentType},
+                                     data-download-url=@{/documents/{id}/download(id=${doc.id})}">
+                        <i class="ti ti-eye me-1"></i>Preview
+                    </button>
+                    <a th:href="@{/documents/{id}/download(id=${doc.id})}" class="btn btn-sm btn-primary">
+                        <i class="ti ti-download me-1"></i>Download
+                    </a>
+                    <a th:href="@{/documents/{id}/edit(id=${doc.id})}" class="btn btn-sm btn-outline-secondary">
+                        <i class="ti ti-edit me-1"></i>Edit
+                    </a>
+                    <form th:action="@{/documents/{id}/delete(id=${doc.id})}" method="post" class="d-inline ms-auto">
+                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                th:attr="data-confirm=|Delete document '${doc.title}'?|">
+                            <i class="ti ti-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${page.totalPages > 1}" class="card mt-4">
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary"
+               th:text="|Page ${page.number + 1} of ${page.totalPages}|">Page 1 of 1</p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item" th:classappend="${not page.hasPrevious()} ? 'disabled' : ''">
+                    <a class="page-link"
+                       th:href="@{/documents(page=${page.number - 1}, category=${category}, keyword=${keyword})}">
+                        Prev
+                    </a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+                    th:classappend="${i == page.number} ? 'active' : ''">
+                    <a class="page-link"
+                       th:href="@{/documents(page=${i}, category=${category}, keyword=${keyword})}"
+                       th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${not page.hasNext()} ? 'disabled' : ''">
+                    <a class="page-link"
+                       th:href="@{/documents(page=${page.number + 1}, category=${category}, keyword=${keyword})}">
+                        Next
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</body>
+</html>
