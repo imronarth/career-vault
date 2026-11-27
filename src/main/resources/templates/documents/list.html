@@ -31,7 +31,8 @@
                    th:classappend="${category == cat} ? 'btn-primary' : 'btn-outline-secondary'">
                     <i th:class="${cat.iconClass + ' me-1'}"></i>
                     <span th:text="${cat.label}">Category</span>
-                    <span class="badge bg-secondary-lt ms-1"
+                    <span class="badge ms-1"
+                          th:classappend="${category == cat} ? 'bg-white text-primary' : 'bg-secondary-lt'"
                           th:text="${categoryCounts != null and categoryCounts.get(cat) != null ? categoryCounts.get(cat) : 0}">0</span>
                 </a>
             </div>
@@ -84,7 +85,7 @@
                     </div>
 
                     <p th:if="${doc.description != null and not #strings.isEmpty(doc.description)}"
-                       class="text-secondary small mb-2" th:text="${doc.description}">Description</p>
+                       class="text-secondary small mb-2" th:text="${#strings.abbreviate(doc.description, 150)}">Description</p>
 
                     <div class="text-secondary small">
                         <span th:text="${doc.fileSizeBytes >= 1048576 ? #numbers.formatDecimal(doc.fileSizeBytes / 1048576.0, 1, 1) + ' MB' : (doc.fileSizeBytes >= 1024 ? #numbers.formatDecimal(doc.fileSizeBytes / 1024.0, 1, 1) + ' KB' : doc.fileSizeBytes + ' B')}">0 B</span>
