@@ -15,10 +15,10 @@ WORKDIR /app
 RUN addgroup -S spring \
     && adduser -S spring -G spring \
     && mkdir -p /app/storage \
-    && chown -R spring:spring /app
+    && chown -R spring:spring /app/storage
 
-COPY --from=build --chown=spring:spring /workspace/target/*.jar /app/app.jar
-COPY --chown=spring:spring entrypoint.sh /app/entrypoint.sh
+COPY --from=build /workspace/target/*.jar /app/app.jar
+COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
 USER spring:spring
