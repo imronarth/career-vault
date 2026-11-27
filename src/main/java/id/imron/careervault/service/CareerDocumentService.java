@@ -1,5 +1,7 @@
 package id.imron.careervault.service;
 
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Objects;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -55,6 +57,14 @@ public class CareerDocumentService {
                 ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), NEWEST_FIRST)
                 : pageable;
         return documents.findAll(CareerDocumentSpecs.matching(keyword, category), sorted);
+    }
+
+    /** Number of documents per category; categories without documents are absent. */
+    @Transactional(readOnly = true)
+    public Map<DocumentCategory, Long> countByCategory() {
+        Map<DocumentCategory, Long> counts = new EnumMap<>(DocumentCategory.class);
+        documents.countGroupedByCategory().forEach(row -> counts.put(row.getCategory(), row.getTotal()));
+        return counts;
     }
 
     /** @throws EntityNotFoundException if there is no such document */
