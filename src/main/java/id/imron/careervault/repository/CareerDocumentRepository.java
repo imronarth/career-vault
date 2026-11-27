@@ -12,6 +12,8 @@ import id.imron.careervault.domain.DocumentCategory;
 public interface CareerDocumentRepository
         extends JpaRepository<CareerDocument, Long>, JpaSpecificationExecutor<CareerDocument> {
 
+    List<CareerDocument> findByCategoryAndPrimaryTrue(DocumentCategory category);
+
     /** One row per category that has at least one document. */
     @Query("select d.category as category, count(d) as total from CareerDocument d group by d.category")
     List<CategoryCount> countGroupedByCategory();
