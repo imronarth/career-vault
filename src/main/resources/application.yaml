@@ -17,6 +17,9 @@ spring:
 
 server:
   forward-headers-strategy: framework
+  tomcat:
+    # Read and discard rejected uploads up to this size, so the browser receives the 413 page, not a dropped connection.
+    max-swallow-size: 200MB
 
 app:
   storage:
