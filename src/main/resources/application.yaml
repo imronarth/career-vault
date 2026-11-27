@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: career-vault
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:db}:${DB_PORT:5432}/${POSTGRES_DB:careervault}
+    username: ${POSTGRES_USER:careervault}
+    password: ${POSTGRES_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 55MB
+
+server:
+  forward-headers-strategy: framework
+
+app:
+  storage:
+    root: ${APP_STORAGE_ROOT:/app/storage}
