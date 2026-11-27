@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/app :: layout(title=${documentId == null ? 'Upload Document' : 'Edit Document'}, active='documents', content=~{::content})}">
+<body>
+<div th:fragment="content">
+    <div class="page-header d-print-none mb-4">
+        <div class="row align-items-center">
+            <div class="col">
+                <h2 class="page-title"
+                    th:text="${documentId == null ? 'Upload Document' : 'Edit Document'}">Document</h2>
+            </div>
+            <div class="col-auto ms-auto">
+                <a th:href="@{/documents}" class="btn btn-outline-secondary">
+                    <i class="ti ti-arrow-left me-1"></i>Cancel
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <form th:action="${documentId == null} ? @{/documents/upload} : @{/documents/{id}/edit(id=${documentId})}"
+              th:object="${form}" method="post" enctype="multipart/form-data" class="card-body">
+
+            <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger" role="alert">
+                Please fix the highlighted fields below.
+            </div>
+
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label"
+                           th:classappend="${documentId == null} ? 'required' : ''"
+                           for="file"
+                           th:text="${documentId == null ? 'Document File' : 'Replace File (optional)'}">File</label>
+                    <input id="file" type="file" th:field="*{file}" class="form-control"
+                           th:errorclass="is-invalid" th:required="${documentId == null}">
+                    <div class="form-hint">Max 50 MB. Allowed: PDF, images, Office docs, TXT, MD, ZIP.</div>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('file')}"
+                         th:errors="*{file}">Invalid file</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label required" for="title">Title</label>
+                    <input id="title" type="text" th:field="*{title}" class="form-control"
+                           th:errorclass="is-invalid" required>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('title')}"
+                         th:errors="*{title}">Invalid title</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label required" for="category">Category</label>
+                    <select id="category" th:field="*{category}" class="form-select"
+                            th:errorclass="is-invalid" required>
+                        <option value="">Choose category...</option>
+                        <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat.label}">Category</option>
+                    </select>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('category')}"
+                         th:errors="*{category}">Invalid category</div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label" for="versionLabel">Version Label</label>
+                    <input id="versionLabel" type="text" th:field="*{versionLabel}" class="form-control"
+                           th:errorclass="is-invalid" placeholder="e.g. v2.1, Backend-2026">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('versionLabel')}"
+                         th:errors="*{versionLabel}">Invalid version</div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label" for="issuerOrContext">Issuer / Context</label>
+                    <input id="issuerOrContext" type="text" th:field="*{issuerOrContext}" class="form-control"
+                           th:errorclass="is-invalid" placeholder="University, Company, AWS...">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('issuerOrContext')}"
+                         th:errors="*{issuerOrContext}">Invalid issuer</div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label" for="documentDate">Document Date</label>
+                    <input id="documentDate" type="date" th:field="*{documentDate}" class="form-control"
+                           th:errorclass="is-invalid">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('documentDate')}"
+                         th:errors="*{documentDate}">Invalid date</div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label" for="tags">Tags</label>
+                    <input id="tags" type="text" th:field="*{tags}" class="form-control"
+                           th:errorclass="is-invalid" placeholder="java, spring, backend">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('tags')}"
+                         th:errors="*{tags}">Invalid tags</div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label" for="description">Description</label>
+                    <textarea id="description" th:field="*{description}" rows="3" class="form-control"
+                              th:errorclass="is-invalid"></textarea>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}"
+                         th:errors="*{description}">Invalid description</div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-check">
+                        <input type="checkbox" th:field="*{isPrimary}" class="form-check-input">
+                        <span class="form-check-label">Set as primary document for this category</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-end gap-2">
+                <a th:href="@{/documents}" class="btn btn-outline-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary"
+                        th:text="${documentId == null ? 'Upload Document' : 'Save Changes'}">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>
