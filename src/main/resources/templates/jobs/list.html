@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/app :: layout(title='Job Applications', active='jobs', content=~{::content})}">
+<body>
+<div th:fragment="content">
+    <div class="page-header d-print-none mb-4">
+        <div class="row align-items-center">
+            <div class="col">
+                <h2 class="page-title">Job Applications</h2>
+                <div class="text-secondary mt-1" th:text="|${page.totalElements} application(s)|">0 application(s)</div>
+            </div>
+            <div class="col-auto ms-auto d-flex gap-2">
+                <a th:href="@{/jobs/export.csv(keyword=${filter.keyword}, status=${filter.status}, workMode=${filter.workMode}, platform=${filter.platform})}"
+                   class="btn btn-outline-secondary">
+                    <i class="ti ti-download me-1"></i>Export CSV
+                </a>
+                <a th:href="@{/jobs/new}" class="btn btn-primary">
+                    <i class="ti ti-plus me-1"></i>Add Application
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form th:action="@{/jobs}" th:object="${filter}" method="get" class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label" for="filter-keyword">Keyword</label>
+                    <input id="filter-keyword" type="text" th:field="*{keyword}" class="form-control"
+                           placeholder="Company, role, location, contact...">
+                </div>
+                <div class="col-sm-6 col-md-2">
+                    <label class="form-label" for="filter-status">Status</label>
+                    <select id="filter-status" th:field="*{status}" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.label}">Status</option>
+                    </select>
+                </div>
+                <div class="col-sm-6 col-md-2">
+                    <label class="form-label" for="filter-work-mode">Work Mode</label>
+                    <select id="filter-work-mode" th:field="*{workMode}" class="form-select">
+                        <option value="">All Modes</option>
+                        <option th:each="wm : ${workModes}" th:value="${wm}" th:text="${wm.label}">Mode</option>
+                    </select>
+                </div>
+                <div class="col-sm-6 col-md-2">
+                    <label class="form-label" for="filter-platform">Platform</label>
+                    <input id="filter-platform" type="text" th:field="*{platform}" class="form-control"
+                           placeholder="LinkedIn, Glints...">
+                </div>
+                <div class="col-sm-6 col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    <a th:href="@{/jobs}" class="btn btn-outline-secondary">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div th:if="${page.empty}" class="card-body text-center py-5">
+            <p class="text-secondary mb-3">No job applications match your filter.</p>
+            <a th:href="@{/jobs/new}" class="btn btn-primary">
+                <i class="ti ti-plus me-1"></i>Add your first application
+            </a>
+        </div>
+
+        <div th:if="${not page.empty}" class="table-responsive">
+            <table class="table table-vcenter card-table table-hover">
+                <thead>
+                <tr>
+                    <th>Company &amp; Role</th>
+                    <th>Work Mode</th>
+                    <th>Platform</th>
+                    <th>Status</th>
+                    <th>Applied</th>
+                    <th>Follow-up</th>
+                    <th class="w-1">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="job : ${page.content}">
+                    <td>
+                        <a th:href="@{/jobs/{id}(id=${job.id})}" class="fw-medium text-reset"
+                           th:text="${job.companyName}">Company</a>
+                        <div class="text-secondary small" th:text="${job.roleTitle}">Role</div>
+                    </td>
+                    <td>
+                        <span th:text="${job.workMode.label}">Remote</span>
+                        <div class="text-secondary small" th:if="${job.location}" th:text="${job.location}"></div>
+                    </td>
+                    <td class="text-secondary" th:text="${job.platform ?: '-'}">-</td>
+                    <td>
+                        <span class="badge" th:classappend="${job.status.badgeClass}"
+                              th:text="${job.status.label}">Status</span>
+                    </td>
+                    <td class="text-secondary" th:text="${job.appliedDate ?: '-'}">-</td>
+                    <td class="text-secondary" th:text="${job.followUpDate ?: '-'}">-</td>
+                    <td class="cv-table-actions">
+                        <div class="btn-list flex-nowrap">
+                            <a th:href="@{/jobs/{id}(id=${job.id})}" class="btn btn-sm btn-outline-secondary">View</a>
+                            <a th:href="@{/jobs/{id}/edit(id=${job.id})}" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <form th:action="@{/jobs/{id}/delete(id=${job.id})}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        th:attr="data-confirm=|Delete application at ${job.companyName}?|">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:if="${page.totalPages > 1}" class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary"
+               th:text="|Page ${page.number + 1} of ${page.totalPages}|">Page 1 of 1</p>
+            <ul class="pagination m-0 ms-auto">
+                <li class="page-item" th:classappend="${not page.hasPrevious()} ? 'disabled' : ''">
+                    <a class="page-link"
+                       th:href="@{/jobs(page=${page.number - 1}, keyword=${filter.keyword}, status=${filter.status}, workMode=${filter.workMode}, platform=${filter.platform})}">
+                        Prev
+                    </a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+                    th:classappend="${i == page.number} ? 'active' : ''">
+                    <a class="page-link"
+                       th:href="@{/jobs(page=${i}, keyword=${filter.keyword}, status=${filter.status}, workMode=${filter.workMode}, platform=${filter.platform})}"
+                       th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${not page.hasNext()} ? 'disabled' : ''">
+                    <a class="page-link"
+                       th:href="@{/jobs(page=${page.number + 1}, keyword=${filter.keyword}, status=${filter.status}, workMode=${filter.workMode}, platform=${filter.platform})}">
+                        Next
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</body>
+</html>

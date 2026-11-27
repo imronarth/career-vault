@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/app :: layout(title=${jobId == null ? 'New Application' : 'Edit Application'}, active='jobs', content=~{::content})}">
+<body>
+<div th:fragment="content">
+    <div class="page-header d-print-none mb-4">
+        <div class="row align-items-center">
+            <div class="col">
+                <h2 class="page-title"
+                    th:text="${jobId == null ? 'New Job Application' : 'Edit Job Application'}">Job Application</h2>
+            </div>
+            <div class="col-auto ms-auto">
+                <a th:href="${jobId == null} ? @{/jobs} : @{/jobs/{id}(id=${jobId})}"
+                   class="btn btn-outline-secondary">
+                    <i class="ti ti-arrow-left me-1"></i>Cancel
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <form th:action="${jobId == null} ? @{/jobs} : @{/jobs/{id}(id=${jobId})}"
+              th:object="${form}" method="post" class="card-body">
+
+            <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger" role="alert">
+                Please fix the highlighted fields below.
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label required" for="companyName">Company Name</label>
+                    <input id="companyName" type="text" th:field="*{companyName}" class="form-control"
+                           th:errorclass="is-invalid" required>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('companyName')}"
+                         th:errors="*{companyName}">Invalid company</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label required" for="roleTitle">Role Title</label>
+                    <input id="roleTitle" type="text" th:field="*{roleTitle}" class="form-control"
+                           th:errorclass="is-invalid" required>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('roleTitle')}"
+                         th:errors="*{roleTitle}">Invalid role</div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label required" for="status">Status</label>
+                    <select id="status" th:field="*{status}" class="form-select"
+                            th:errorclass="is-invalid" required>
+                        <option value="">Choose status...</option>
+                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.label}">Status</option>
+                    </select>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('status')}"
+                         th:errors="*{status}">Invalid status</div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label required" for="workMode">Work Mode</label>
+                    <select id="workMode" th:field="*{workMode}" class="form-select"
+                            th:errorclass="is-invalid" required>
+                        <option value="">Choose work mode...</option>
+                        <option th:each="wm : ${workModes}" th:value="${wm}" th:text="${wm.label}">Mode</option>
+                    </select>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('workMode')}"
+                         th:errors="*{workMode}">Invalid work mode</div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label" for="platform">Platform</label>
+                    <input id="platform" type="text" th:field="*{platform}" class="form-control"
+                           th:errorclass="is-invalid" placeholder="LinkedIn, Kalibrr, Direct...">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('platform')}"
+                         th:errors="*{platform}">Invalid platform</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label" for="location">Location</label>
+                    <input id="location" type="text" th:field="*{location}" class="form-control"
+                           th:errorclass="is-invalid" placeholder="Jakarta, Remote...">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('location')}"
+                         th:errors="*{location}">Invalid location</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label" for="salaryRange">Salary Range</label>
+                    <input id="salaryRange" type="text" th:field="*{salaryRange}" class="form-control"
+                           th:errorclass="is-invalid" placeholder="e.g. IDR 15-20M">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('salaryRange')}"
+                         th:errors="*{salaryRange}">Invalid salary range</div>
+                </div>
+
+                <div class="col-md-8">
+                    <label class="form-label" for="jobUrl">Job Posting URL</label>
+                    <input id="jobUrl" type="url" th:field="*{jobUrl}" class="form-control"
+                           th:errorclass="is-invalid" placeholder="https://...">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('jobUrl')}"
+                         th:errors="*{jobUrl}">Invalid URL</div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label" for="contactPerson">Contact Person</label>
+                    <input id="contactPerson" type="text" th:field="*{contactPerson}" class="form-control"
+                           th:errorclass="is-invalid">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('contactPerson')}"
+                         th:errors="*{contactPerson}">Invalid contact</div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label" for="appliedDate">Applied Date</label>
+                    <input id="appliedDate" type="date" th:field="*{appliedDate}" class="form-control"
+                           th:errorclass="is-invalid">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('appliedDate')}"
+                         th:errors="*{appliedDate}">Invalid date</div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label" for="followUpDate">Follow-up Date</label>
+                    <input id="followUpDate" type="date" th:field="*{followUpDate}" class="form-control"
+                           th:errorclass="is-invalid">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('followUpDate')}"
+                         th:errors="*{followUpDate}">Invalid date</div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label" for="cvDocumentId">Attached CV</label>
+                    <select id="cvDocumentId" th:field="*{cvDocumentId}" class="form-select">
+                        <option value="">None</option>
+                        <option th:each="doc : ${cvDocuments}" th:value="${doc.id}"
+                                th:text="${doc.versionLabel != null and not #strings.isEmpty(doc.versionLabel) ? doc.title + ' (' + doc.versionLabel + ')' : doc.title}">
+                            CV
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label" for="coverLetterDocumentId">Attached Cover Letter</label>
+                    <select id="coverLetterDocumentId" th:field="*{coverLetterDocumentId}" class="form-select">
+                        <option value="">None</option>
+                        <option th:each="doc : ${coverLetterDocuments}" th:value="${doc.id}"
+                                th:text="${doc.versionLabel != null and not #strings.isEmpty(doc.versionLabel) ? doc.title + ' (' + doc.versionLabel + ')' : doc.title}">
+                            Cover Letter
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label" for="notes">Notes</label>
+                    <textarea id="notes" th:field="*{notes}" rows="4" class="form-control"
+                              th:errorclass="is-invalid"></textarea>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('notes')}"
+                         th:errors="*{notes}">Invalid notes</div>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-end gap-2">
+                <a th:href="${jobId == null} ? @{/jobs} : @{/jobs/{id}(id=${jobId})}"
+                   class="btn btn-outline-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary"
+                        th:text="${jobId == null ? 'Create Application' : 'Save Changes'}">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>
