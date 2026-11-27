@@ -1,0 +1,16 @@
+/* Career Vault custom styles (layered on Tabler 1.7.5) */
+
+.cv-preview-frame {
+    width: 100%;
+    height: 75vh;
+    border: 0;
+}
+
+.cv-preview-image {
+    max-height: 75vh;
+    width: auto;
+}
+
+.cv-table-actions {
+    white-space: nowrap;
+}
